@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Follow a $10,000 IT invoice in Washington State through every tax until it lands in the owner's and the employee's bank accounts.">
+<meta property="og:title" content="Where Bob's $10,000 goes">
+<meta property="og:description" content="A $10,000 check, followed through every tax until it lands in the owner's and the employee's bank accounts.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://taxationistheft.tax/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231f7a5c'/%3E%3Ctext x='16' y='23' font-family='Arial' font-size='20' font-weight='bold' fill='white' text-anchor='middle'%3E$%3C/text%3E%3C/svg%3E">
+<title>Bob's $10,000 Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  /* Layout: the check, a shared trunk ledger, then a two-column grid where each stage (payroll, income tax, property, ...) is one grid row so the business and Sue line up; a merged total closes the page */
+  :root {
+    --bg: #eef2f1;
+    --paper: #fbfcfb;
+    --ink: #1c2a2b;
+    --muted: #5b6b6c;
+    --rule: #cfd9d8;
+    --gov: #b0661b;
+    --fee: #4f6a9a;
+    --spend: #9aa6a5;
+    --left: #1f7a5c;
+    --left-2: #6fae94;
+    --sue: #7558a8;
+    --check: #e3ede9;
+    --check-line: #b9cfc6;
+    --font-display: "Public Sans", "Helvetica Neue", Arial, sans-serif;
+    --font-body: "Public Sans", "Helvetica Neue", Arial, sans-serif;
+    --font-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121a1b; --paper: #192324; --ink: #e3ecea; --muted: #93a5a4; --rule: #2d3b3c;
+      --gov: #e3984f; --fee: #8fa8d8; --spend: #5d6b6a; --left: #4cc39a; --left-2: #2f7d63; --sue: #b29ae0;
+      --check: #1c2b28; --check-line: #33483f; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #121a1b; --paper: #192324; --ink: #e3ecea; --muted: #93a5a4; --rule: #2d3b3c;
+    --gov: #e3984f; --fee: #8fa8d8; --spend: #5d6b6a; --left: #4cc39a; --left-2: #2f7d63; --sue: #b29ae0;
+    --check: #1c2b28; --check-line: #33483f; color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+    padding-inline: 16px; padding-block: 32px 64px;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+  .narrow { max-width: 920px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+  h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+  h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+  h2 { font-size: 1.15rem; font-weight: 700; }
+  h3 { font-size: 1rem; font-weight: 700; }
+  p { margin: 0; max-width: 65ch; }
+  .lede { color: var(--muted); font-size: 1.05rem; }
+  .eyebrow { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+  /* The check */
+  .check {
+    background:
+      repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--check-line) 35%, transparent) 6px 7px),
+      var(--check);
+    border: 1px solid var(--check-line); border-radius: 6px;
+    padding: 20px 22px; display: grid; gap: 14px;
+    font-family: var(--font-num); font-size: 0.85rem;
+  }
+  .check-top, .check-bottom { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; color: var(--muted); }
+  .check-pay { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; }
+  .check-pay .to { flex: 1 1 240px; border-bottom: 1px solid var(--check-line); padding-bottom: 2px; min-width: 0; }
+  .check-pay .amt { border: 1px solid var(--check-line); background: var(--paper); padding: 4px 10px; font-weight: 600; font-size: 1.05rem; }
+  .check-words { border-bottom: 1px solid var(--check-line); padding-bottom: 2px; }
+  .check small { font-size: 0.7rem; color: var(--muted); display: block; }
+
+  /* Summary tiles */
+  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .tile { background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 16px 18px; display: grid; gap: 4px; align-content: start; }
+  .tile .big { font-family: var(--font-num); font-size: 1.6rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .tile.gov .big { color: var(--gov); }
+  .tile.fee .big { color: var(--fee); }
+  .tile.left .big { color: var(--left); }
+  .tile.sue .big { color: var(--sue); }
+  .tile p { color: var(--muted); font-size: 0.85rem; }
+
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 0.85rem; color: var(--muted); align-items: center; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+  .sw.gov { background: var(--gov); }
+  .sw.fee { background: var(--fee); }
+  .sw.spend { background: var(--spend); }
+  .sw.left { background: var(--left); }
+  .sw.left2 { background: var(--left-2); }
+  .sw.sue { background: var(--sue); }
+
+  /* Ledger cells */
+  .ledger { background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; min-width: 0; }
+  .lhead { padding: 16px 18px 12px; display: grid; gap: 6px; }
+  .lhead .start { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 1.3rem; font-weight: 600; }
+  .lhead p { color: var(--muted); font-size: 0.86rem; }
+  .phase { padding: 14px 18px 8px; border-bottom: 1px solid var(--rule); display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .phase h3 { font-size: 0.92rem; }
+  .pill { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 999px; padding: 2px 9px; border: 1px solid currentColor; }
+  .pill.exact { color: var(--left); }
+  .pill.est { color: var(--gov); }
+
+  .row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 12px; padding: 12px 18px; border-bottom: 1px solid var(--rule); align-items: baseline; }
+  .row:last-child { border-bottom: 0; }
+  .row .d1 { grid-column: 1 / -1; }
+  .row .t { font-weight: 600; }
+  .row .who { font-size: 0.78rem; color: var(--muted); font-weight: 500; }
+  .row .n { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 0.88rem; }
+  .row .lbl { display: block; font-family: var(--font-body); font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .row .taken { color: var(--gov); font-weight: 600; }
+  .row .taken.feec { color: var(--fee); }
+  .row .taken.spendc { color: var(--muted); }
+  .row .taken.zero { color: var(--muted); font-weight: 400; }
+  .row .gt { color: var(--gov); }
+  .row .lt { color: var(--left); font-weight: 600; }
+  .row .note { grid-column: 1 / -1; color: var(--muted); font-size: 0.85rem; }
+  .row.info { background: color-mix(in srgb, var(--bg) 60%, var(--paper)); }
+  .row.info .t { color: var(--left); }
+  .bar { grid-column: 1 / -1; height: 8px; border-radius: 2px; display: flex; overflow: hidden; background: var(--left); }
+  .bar .g { background: var(--gov); height: 100%; }
+  .bar .f { background: var(--fee); height: 100%; }
+  .bar .s { background: var(--spend); height: 100%; }
+  .bar .u { background: var(--sue); height: 100%; }
+  .bar.suebar { background: var(--sue); }
+  .row .ut { color: var(--sue); font-weight: 600; }
+  .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 2px 12px; margin-top: 6px; font-size: 0.8rem; }
+  .split div { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px dotted var(--rule); }
+  .split .num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+  .cellfoot { padding: 8px 18px; font-size: 0.78rem; color: var(--muted); border-top: 1px solid var(--rule); display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .cellfoot .num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+  .who-tag { padding: 10px 18px 0; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+
+  /* Fork + aligned stages */
+  .fork svg { width: 100%; height: 60px; display: block; }
+  .fork path { fill: none; stroke: var(--rule); stroke-width: 3; }
+  .stages { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; align-items: stretch; }
+  .stage-head { grid-column: 1 / -1; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; padding-top: 14px; border-top: 2px solid var(--rule); }
+  .stage-head:first-of-type { border-top: 0; padding-top: 0; }
+  .stage-head h2 { font-size: 1.05rem; }
+  .stage-head .idx { font-family: var(--font-num); color: var(--muted); font-size: 0.85rem; }
+  .stage-head p { flex-basis: 100%; color: var(--muted); font-size: 0.86rem; }
+  .stages .ledger { display: flex; flex-direction: column; }
+  .stages .ledger .rows { flex: 1; }
+  .callout { margin: 0 18px 14px; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 4px; font-size: 0.85rem; color: var(--muted); }
+  .callout strong { color: var(--ink); }
+  .final .lhead .start { color: var(--left); font-size: 1.6rem; }
+
+  /* Merge */
+  .merge { background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 18px; display: grid; gap: 14px; }
+  .stack { display: flex; height: 28px; border-radius: 3px; overflow: hidden; }
+  .stack span { height: 100%; }
+  .mtable { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  .mtable td { padding: 6px 0; border-bottom: 1px solid var(--rule); vertical-align: baseline; }
+  .mtable td + td { text-align: right; font-family: var(--font-num); font-variant-numeric: tabular-nums; white-space: nowrap; padding-left: 12px; }
+  .mtable th { text-align: right; font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding: 0 0 6px 12px; }
+  .mtable th:first-child { text-align: left; padding-left: 0; }
+  .mtable tr.total td { font-weight: 700; border-bottom: 0; }
+
+  .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; font-size: 0.88rem; color: var(--muted); }
+  .notes h2 { font-size: 0.95rem; color: var(--ink); margin-bottom: 6px; }
+  .notes ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+  .notes a { color: var(--ink); }
+
+  @media (max-width: 820px) {
+    .stages { grid-template-columns: minmax(0, 1fr); }
+    .fork svg { display: none; }
+  }
+</style>
+
+<style>html{-webkit-text-size-adjust:100%} :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)} body{margin:0} img{max-width:100%}</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="narrow">
+    <header style="display:grid;gap:10px">
+      <div class="eyebrow">Washington State · 2026 · One month of work</div>
+      <h1>Where Bob's $10,000 goes</h1>
+      <p class="lede">Bob's Computers is an LLC owned by Bob, with one employee: Sue, who earns $5,000 a month. Bob bills a new client $10,000 for a month of IT support. The money comes in as one check, then splits between the business and Sue's paycheck. Follow both until the money lands in Bob's and Sue's personal bank accounts.</p>
+    </header>
+
+    <div class="check" aria-label="The client's check">
+      <div class="check-top"><span>Client Co. · Operating Account</span><span>No. 4417 · Oct 3, 2026</span></div>
+      <div class="check-pay">
+        <div class="to"><small>Pay to the order of</small>Bob's Computers LLC</div>
+        <div class="amt">$10,000.00</div>
+      </div>
+      <div class="check-words">Ten thousand and 00/100 dollars</div>
+      <div class="check-bottom"><span>Memo: IT support, September</span><span>⑆125000000⑆ 4417</span></div>
+    </div>
+
+    <section class="summary" id="summary" aria-label="Totals"></section>
+
+    <div class="legend">
+      <span><i class="sw gov"></i>Taxes</span>
+      <span><i class="sw sue"></i>Sue's paycheck</span>
+      <span><i class="sw left"></i>Left with the business / Bob</span>
+    </div>
+
+    <section class="ledger" id="trunk" aria-label="Before the split"></section>
+  </div>
+
+  <div class="fork" aria-hidden="true">
+    <svg viewBox="0 0 1000 60" preserveAspectRatio="none"><path d="M500 0 V15 Q500 30 250 35 V60" /><path d="M500 15 Q500 30 750 35 V60" /></svg>
+  </div>
+
+  <div class="stages" id="stages"></div>
+
+  <div class="narrow">
+    <section class="merge" aria-label="Where the $10,000 ended up">
+      <h2>Where the $10,000 ended up</h2>
+      <div class="stack" id="stack" role="img"></div>
+      <div class="legend" id="stackLegend"></div>
+      <table class="mtable" id="mtable"></table>
+      <p style="color:var(--muted);font-size:0.86rem">This isn't the end. When Bob and Sue spend this money, they pay sales tax, and every dollar becomes another business's gross receipts, taxed again with B&O, payroll and income tax on its own workers.</p>
+    </section>
+
+    <section class="notes">
+      <div>
+        <h2>Assumptions</h2>
+        <ul>
+          <li>$10,000 every month ($120k/yr), and the business has no costs other than Sue.</li>
+          <li>Sue and Bob each file single with the standard deduction ($16,100) and have no other income.</li>
+          <li>Sue earns $5,000/month ($60,000/yr), about 173 hours a month. Bob takes no paycheck. The LLC's profit is Bob's personal income, whether he draws it or not.</li>
+          <li>~10% combined sales tax. Actual rates run about 8.x% to 10.6% by city. No local city B&O tax.</li>
+          <li>WA unemployment at 1.2% plus the 0.03% administration fee. Each employer's real rate depends on its layoff history.</li>
+          <li>L&I at about $0.30/hour, with Sue paying about 24%. The real rate depends on the risk class and claims history.</li>
+        </ul>
+      </div>
+      <div>
+        <h2>How the numbers were built</h2>
+        <ul>
+          <li>The sales tax comes out of the $10,000 because it wasn't listed on the invoice. Under WAC 458-20-107 the state treats an unlisted-tax price as pre-tax, so Bob owes the full 10%.</li>
+          <li>Sue's federal withholding: $60,000 − $16,100 = $43,900 taxable, $5,020/yr.</li>
+          <li>Bob's profit: $3,465.88/month ($41,591/yr). Self-employment tax is 15.3% of 92.35% of profit ($5,877/yr). Income tax is on profit minus half the SE tax, the standard deduction and the 20% QBI deduction: $18,042 taxable, $1,917/yr.</li>
+        </ul>
+      </div>
+      <div>
+        <h2>Sources</h2>
+        <ul>
+          <li><a href="https://www.dor.wa.gov/laws-rules/interim_guidance_statements/interim-guidance-statement-regarding-changes-made-essb-5814-information-technology-services">WA DOR: ESSB 5814 and IT services</a></li>
+          <li><a href="https://esd.wa.gov/node/1109">WA ESD: Paid Family &amp; Medical Leave 1.13% in 2026</a></li>
+          <li><a href="https://lni.wa.gov/2026Rates">L&amp;I: 2026 workers' comp rates</a></li>
+          <li><a href="https://news.bloombergtax.com/payroll/washington-announces-2026-unemployment-taxable-wage-base">2026 WA unemployment wage base</a></li>
+          <li><a href="https://www.wipfli.com/insights/articles/tax-how-2025-washington-state-tax-reform-impacts-businesses-and-taxpayers">Wipfli: 2025 WA tax reform</a></li>
+          <li><a href="https://www.empower.com/node/8666">Empower: 2026 federal brackets</a></li>
+        </ul>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+  const fmt = (v) => "$" + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const r2 = (v) => Math.round(v * 100) / 100;
+
+  const trunkRows = [
+    { t: "Sales tax", who: "WA Dept. of Revenue", tax: 1000, note: "IT support has been a retail sale in Washington since Oct 1, 2025. The invoice didn't list sales tax, so the state treats $10,000 as the pre-tax price and Bob owes ~10% out of pocket." },
+    { t: "B&O tax", who: "WA Dept. of Revenue", tax: 47.10, note: "0.471% retailing rate on gross receipts. Owed whether or not Bob made a profit." },
+    { kind: "info", t: "Now it splits: $5,000 to Sue's paycheck", who: "Checkpoint", note: "$5,000 of the remaining $8,952.90 becomes Sue's gross pay. The other $3,952.90 stays with the business." },
+  ];
+
+  const branches = {
+    biz: { name: "Bob's Computers → Bob", eyebrow: "The business and its owner", start: 3952.90, intro: "The bar still shows the whole $10,000: taxes so far (starting with the $1,047.10 taken before the split), Sue's $5,000 paycheck, and what's left with the business." },
+    sue: { name: "Sue", eyebrow: "The employee", start: 5000, intro: "Sue's gross pay for the month.",
+      callout: "<strong>Sue's job actually costs $5,487.02 a month.</strong> The company pays $487.02 in taxes on her wages that never appear on her pay stub." },
+  };
+
+  const stages = [
+    { title: "Payroll taxes", intro: "The law requires the company to hold back the taxes shown on the front of Sue's check and pay them to the government on her behalf. The company also pays additional taxes on her wages that never appear on her check.",
+      biz: [
+        { t: "Social Security, employer half (6.2%)", who: "IRS, Form 941", tax: 310.00 },
+        { t: "Medicare, employer half (1.45%)", who: "IRS, Form 941", tax: 72.50 },
+        { t: "Federal unemployment (FUTA)", who: "IRS, Form 940", tax: 3.50, note: "$42 a year on the first $7,000 of wages, averaged." },
+        { t: "WA unemployment insurance", who: "WA Employment Security", tax: 61.50, note: "About 1.2% plus a 0.03% administration fee." },
+        { t: "L&I workers' comp, employer share", who: "WA Labor & Industries", tax: 39.52, note: "About $0.23 per hour Sue works." },
+      ],
+      sue: [
+        { t: "Social Security (6.2%)", who: "IRS", tax: 310.00 },
+        { t: "Medicare (1.45%)", who: "IRS", tax: 72.50 },
+        { t: "WA Paid Family & Medical Leave (0.807%)", who: "WA Employment Security", tax: 40.36, note: "The employee share of the 1.13% premium." },
+        { t: "WA Cares long-term care (0.58%)", who: "WA Employment Security", tax: 29.00 },
+        { t: "L&I workers' comp, Sue's share", who: "WA Labor & Industries", tax: 12.48, note: "About $0.07 per hour. Washington is one of the few states where workers pay part of workers' comp." },
+      ] },
+    { title: "Income taxes", intro: "Sue's is withheld from her check. Bob has no paycheck, so he pays his own through quarterly estimates on the company's profit, whether he takes the money out or not.",
+      biz: [
+        { t: "Self-employment tax", who: "IRS, Form 1040-ES", tax: 489.71, note: "The $3,465.88 left after payroll is the company's profit, and it counts as Bob's personal income. He pays both halves of Social Security and Medicare on it: 15.3% of 92.35%." },
+        { t: "Federal income tax", who: "IRS, Form 1040-ES", tax: 159.75, note: "Low because the standard deduction and the 20% QBI deduction cover much of Bob's profit. Washington has no state income tax." },
+      ],
+      sue: [
+        { t: "Federal income tax withheld", who: "IRS", tax: 418.33, note: "Single, standard deduction. Washington has no state income tax." },
+      ] },
+  ];
+
+  // o.sue: Sue's $5,000 shown as its own segment; o.scale: what 100% of the bar means; o.suebar: Sue's own branch, where "left" is her money
+  const fmtRow = (r, run, start, o = {}) => {
+    const info = r.kind === "info";
+    const sue = o.sue || 0, scale = o.scale || start;
+    const taken = info ? "—" : (r.tax === 0 ? "$0.00" : fmt(r.tax));
+    const left = r2(start - run - sue);
+    const leftCls = o.suebar ? "ut" : "lt";
+    return `<div class="row${info ? " info" : ""}">
+      <div class="d1"><div class="t">${r.t}</div><div class="who">${r.who}</div></div>
+      <div class="n taken${!info && r.tax === 0 ? " zero" : ""}"><span class="lbl">Tax</span>${taken}</div>
+      <div class="n gt"><span class="lbl">Taxes so far</span>${fmt(run)}</div>
+      <div class="n ${leftCls}"><span class="lbl">Left</span>${fmt(left)}</div>
+      <div class="bar${o.suebar ? " suebar" : ""}" role="img" aria-label="${fmt(run)} taxes${sue ? `, ${fmt(sue)} to Sue's paycheck` : ""}, ${fmt(left)} left"><span class="g" style="width:${run / scale * 100}%"></span><span class="u" style="width:${sue / scale * 100}%"></span></div>
+      ${r.note ? `<div class="note">${r.note}</div>` : ""}
+    </div>`;
+  };
+
+  // Trunk
+  let trunkTax = 0;
+  let trunkHtml = `<div class="lhead"><div class="eyebrow">Before the split</div><h2>The check hits the business account</h2><div class="start">${fmt(10000)}</div><p>Bob deposits the client's check into the Bob's Computers business account.</p></div>
+    <div class="phase"><h3>Washington takes its share of the gross</h3></div>`;
+  trunkRows.forEach((r) => {
+    if (r.kind !== "info") trunkTax = r2(trunkTax + r.tax);
+    const split = r.kind === "info";
+    trunkHtml += fmtRow(r, trunkTax, 10000, { sue: split ? 5000 : 0 });
+  });
+  document.getElementById("trunk").innerHTML = trunkHtml;
+
+  // Branches, stage by stage
+  const run = { biz: trunkTax, sue: 0 };
+  const opts = { biz: { sue: 5000, scale: 10000 }, sue: { suebar: true } };
+  const startOf = { biz: 10000, sue: 5000 };
+  let html = "";
+  ["biz", "sue"].forEach((k) => {
+    const b = branches[k];
+    html += `<section class="ledger"><div class="lhead"><div class="eyebrow">${b.eyebrow}</div><h2>${b.name}</h2><div class="start">${fmt(b.start)}</div><p>${b.intro}</p></div>${b.callout ? `<div class="callout">${b.callout}</div>` : ""}</section>`;
+  });
+  stages.forEach((st, i) => {
+    html += `<div class="stage-head"><span class="idx">${i + 1} of ${stages.length}</span><h2>${st.title}</h2><p>${st.intro}</p></div>`;
+    ["biz", "sue"].forEach((k) => {
+      const before = run[k];
+      let rows = "";
+      st[k].forEach((r) => { if (r.kind !== "info") run[k] = r2(run[k] + r.tax); rows += fmtRow(r, run[k], startOf[k], opts[k]); });
+      html += `<section class="ledger"><div class="who-tag">${branches[k].name}</div><div class="rows">${rows}</div>
+        <div class="cellfoot"><span>This stage</span><span class="num">${fmt(r2(run[k] - before))} taxes</span></div></section>`;
+    });
+  });
+
+  const finalLeft = { biz: r2(10000 - 5000 - run.biz), sue: r2(5000 - run.sue) };
+  html += `<div class="stage-head"><span class="idx">End</span><h2>Into their personal bank accounts</h2><p>Everything is now fully taxed. What's left moves to Bob's and Sue's own accounts.</p></div>`;
+  const closing = {
+    biz: { label: "Bob's personal account", t: "Bob draws the rest of the profit", who: "Owner's draw", note: "No tax is taken out of the draw itself. Bob already paid self-employment and income tax on the profit above." },
+    sue: { label: "Sue's personal account", t: "Direct deposit of Sue's net pay", who: "Pay stub", note: "Her $5,000 gross pay, after everything on the front of her check." },
+  };
+  ["biz", "sue"].forEach((k) => {
+    const c = closing[k];
+    html += `<section class="ledger final"><div class="lhead"><div class="eyebrow">${c.label}</div><div class="start">${fmt(finalLeft[k])}</div></div><div class="rows">${fmtRow({ kind: "info", t: c.t, who: c.who, note: c.note }, run[k], startOf[k], opts[k])}</div></section>`;
+  });
+  document.getElementById("stages").innerHTML = html;
+
+  // Totals
+  const totalTax = r2(run.biz + run.sue);
+  document.getElementById("summary").innerHTML = `
+    <div class="tile gov"><span class="eyebrow">Taxes</span><span class="big">${fmt(totalTax)}</span><p>${(totalTax / 100).toFixed(1)}% of the $10,000 check.</p></div>
+    <div class="tile sue"><span class="eyebrow">Sue's bank account</span><span class="big">${fmt(finalLeft.sue)}</span><p>Her take-home pay, out of $5,000 gross.</p></div>
+    <div class="tile left"><span class="eyebrow">Bob's bank account</span><span class="big">${fmt(finalLeft.biz)}</span><p>What the owner takes home from a $10,000 invoice.</p></div>`;
+
+  const segs = [
+    ["Taxes", totalTax, "var(--gov)", "gov"],
+    ["Sue's account", finalLeft.sue, "var(--sue)", "sue"],
+    ["Bob's account", finalLeft.biz, "var(--left)", "left"],
+  ];
+  const stack = document.getElementById("stack");
+  stack.setAttribute("aria-label", segs.map(([k, v]) => `${k} ${fmt(v)}`).join(", "));
+  stack.innerHTML = segs.map(([, v, c]) => `<span style="width:${v / 100}%;background:${c}"></span>`).join("");
+  document.getElementById("stackLegend").innerHTML = segs.map(([k, v, , cls]) => `<span><i class="sw ${cls}"></i>${k} ${fmt(v)}</span>`).join("");
+
+  const stageSum = (k, i) => r2(stages[i][k].reduce((a, r) => a + (r.tax || 0), 0));
+  let rowsHtml = `<tr><th>Taxes by stage</th><th>Business / Bob</th><th>Sue</th></tr>
+    <tr><td>Sales tax and B&O, before the split</td><td>${fmt(trunkTax)}</td><td>—</td></tr>`;
+  stages.forEach((st, i) => { rowsHtml += `<tr><td>${st.title}</td><td>${fmt(stageSum("biz", i))}</td><td>${fmt(stageSum("sue", i))}</td></tr>`; });
+  rowsHtml += `<tr class="total"><td>Total taxes</td><td>${fmt(run.biz)}</td><td>${fmt(run.sue)}</td></tr>
+    <tr><td>Lands in their personal accounts</td><td>${fmt(finalLeft.biz)}</td><td>${fmt(finalLeft.sue)}</td></tr>
+    <tr class="total"><td>Total</td><td colspan="2">${fmt(totalTax + finalLeft.biz + finalLeft.sue)}</td></tr>`;
+  document.getElementById("mtable").innerHTML = rowsHtml;
+</script>
+</body>
+</html>
