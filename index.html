@@ -165,6 +165,17 @@
   .mtable th:first-child { text-align: left; padding-left: 0; }
   .mtable tr.total td { font-weight: 700; border-bottom: 0; }
 
+  /* Safety net comparison */
+  .net { background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 18px; display: grid; gap: 14px; }
+  .net-scroll { overflow-x: auto; }
+  .net table { width: 100%; border-collapse: collapse; font-size: 0.88rem; min-width: 560px; }
+  .net th { text-align: left; font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding: 0 12px 8px 0; }
+  .net td { padding: 10px 12px 10px 0; border-top: 1px solid var(--rule); vertical-align: top; }
+  .net td:first-child { font-weight: 600; width: 26%; }
+  .net .yes { color: var(--sue); font-weight: 600; }
+  .net .no { color: var(--gov); font-weight: 600; }
+  .net p { color: var(--muted); font-size: 0.88rem; }
+
   .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; font-size: 0.88rem; color: var(--muted); }
   .notes h2 { font-size: 0.95rem; color: var(--ink); margin-bottom: 6px; }
   .notes ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
@@ -215,6 +226,21 @@
   <div class="stages" id="stages"></div>
 
   <div class="narrow">
+    <section class="net" aria-label="Who has a safety net">
+      <h2>Who has a safety net?</h2>
+      <p>The law requires Bob to fund a safety net for Sue. Bob has no employer funding one for him. If the client stops paying, Bob's income stops the same day, with no notice, no severance and no unemployment check.</p>
+      <div class="net-scroll">
+        <table>
+          <tr><th>If something goes wrong</th><th>Sue</th><th>Bob</th></tr>
+          <tr><td>The work ends</td><td><span class="yes">Unemployment benefits.</span> Funded by the company's state and federal unemployment taxes on her wages.</td><td><span class="no">Nothing.</span> Self-employment income doesn't qualify for unemployment benefits.</td></tr>
+          <tr><td>Hurt on the job</td><td><span class="yes">Workers' comp.</span> The company pays most of the L&I premium.</td><td><span class="no">Only if he opts in</span> to L&I coverage and pays every dollar of the premium himself.</td></tr>
+          <tr><td>New baby or serious illness</td><td><span class="yes">Paid Family &amp; Medical Leave.</span> Premium comes out of her check.</td><td><span class="no">Only if he opts in</span>, pays the premium himself, and commits to it for three years.</td></tr>
+          <tr><td>Needs long-term care</td><td><span class="yes">WA Cares.</span> Premium comes out of her check.</td><td><span class="no">Only if he opted in</span> during a limited enrollment window.</td></tr>
+          <tr><td>Retirement and disability</td><td><span class="yes">Social Security and Medicare.</span> The company pays half.</td><td><span class="yes">Social Security and Medicare</span>, but he pays both halves himself through self-employment tax.</td></tr>
+        </table>
+      </div>
+    </section>
+
     <section class="merge" aria-label="Where the $10,000 ended up">
       <h2>Where the $10,000 ended up</h2>
       <div class="stack" id="stack" role="img"></div>
@@ -252,6 +278,8 @@
           <li><a href="https://news.bloombergtax.com/payroll/washington-announces-2026-unemployment-taxable-wage-base">2026 WA unemployment wage base</a></li>
           <li><a href="https://www.wipfli.com/insights/articles/tax-how-2025-washington-state-tax-reform-impacts-businesses-and-taxpayers">Wipfli: 2025 WA tax reform</a></li>
           <li><a href="https://www.empower.com/node/8666">Empower: 2026 federal brackets</a></li>
+          <li><a href="https://paidleave.wa.gov/help-center/self-employed/who-can-opt-in/">WA Paid Leave: self-employed opt-in</a></li>
+          <li><a href="https://wacaresfund.wa.gov/opt-in">WA Cares: self-employed elective coverage</a></li>
         </ul>
       </div>
     </section>
@@ -351,7 +379,7 @@
   const finalLeft = { biz: r2(10000 - 5000 - run.biz), sue: r2(5000 - run.sue) };
   html += `<div class="stage-head"><span class="idx">End</span><h2>Into their personal bank accounts</h2><p>Everything is now fully taxed. What's left moves to Bob's and Sue's own accounts.</p></div>`;
   const closing = {
-    biz: { label: "Bob's personal account", t: "Bob draws the rest of the profit", who: "Owner's draw", note: "No tax is taken out of the draw itself. Bob already paid self-employment and income tax on the profit above." },
+    biz: { label: "Bob's personal account", t: "Bob draws the rest of the profit", who: "Owner's draw", note: "No tax is taken out of the draw itself. Bob already paid self-employment and income tax on the profit above. If the client walks away, this drops to $0 the same day." },
     sue: { label: "Sue's personal account", t: "Direct deposit of Sue's net pay", who: "Pay stub", note: "Her $5,000 gross pay, after everything on the front of her check." },
   };
   ["biz", "sue"].forEach((k) => {
