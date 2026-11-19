@@ -1,0 +1,21 @@
+# DigitalOcean App Platform spec: serves index.html as a static site.
+# Create:  doctl apps create --spec .do/app.yaml
+# Update:  doctl apps update <app-id> --spec .do/app.yaml
+name: taxationistheft
+region: sfo
+
+static_sites:
+  - name: site
+    # Plain-HTML buildpack: no build step, the repo files are served as they are.
+    environment_slug: html
+    github:
+      repo: darkpixel/taxationistheft
+      branch: master
+      deploy_on_push: true
+    index_document: index.html
+
+# Add this once the default *.ondigitalocean.app URL looks right, then point
+# the domain's DNS at the app as the App Platform control panel instructs.
+# domains:
+#   - domain: taxationistheft.tax
+#     type: PRIMARY

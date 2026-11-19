@@ -55,5 +55,8 @@ The WA unemployment and L&I rates are illustrative; they vary by employer.
 
 ## Build and deploy
 
+- **Production is DigitalOcean App Platform**, as a static site defined in `.do/app.yaml`. It uses the plain-HTML buildpack (no build step) and redeploys on every push to `master`. Every file in the repo is served, so don't commit anything that shouldn't be public. The nginx security headers and `/healthz` below don't apply there.
+- The Docker image is for running the page locally and for the earlier Kubernetes deployment:
+
 - `Dockerfile`: `nginxinc/nginx-unprivileged` (non-root, uid 101) serving on port 8080, configured by `nginx.conf`, with `/healthz` for probes.
 - `.github/workflows/dockerimage.yml` builds on every push to `ghcr.io/darkpixel/taxationistheft`, tagged with the branch, the short sha and `latest` on the default branch.
