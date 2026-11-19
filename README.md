@@ -23,12 +23,3 @@ docker build -t taxationistheft .
 docker run --rm -p 8080:8080 taxationistheft
 # open http://localhost:8080
 ```
-
-## Deploying
-
-The live site runs on DigitalOcean App Platform as a static site, defined in `.do/app.yaml`. Every push to `master` redeploys it.
-
-```sh
-doctl apps create --spec .do/app.yaml             # first time
-doctl apps update <app-id> --spec .do/app.yaml    # after changing the spec
-```
